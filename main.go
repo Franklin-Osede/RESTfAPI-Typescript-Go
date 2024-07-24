@@ -8,20 +8,19 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
-	  "github.com/lib/pq"
-
+	_ "github.com/lib/pq"
 )
 
 type User struct {
-	Id   	int	   `json: "id"`
-	Name    string `json:"name"`
-	Email   string `json:"email"`
+	Id    int    `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
 
-//main function
-func main(){
+// main function
+func main() {
 	//connect to database
-	db, err := sql.Open("postgress", os Getenv("DATABASE_URL"))
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,25 +33,95 @@ func main(){
 	}
 
 	//create router
-	router := mux NewRouter()
+	router := mux.NewRouter()
 	router.HandleFunc("/api/go/users", getUsers(db)).Methods("GET")
 	router.HandleFunc("/api/go/users", createUser(db)).Methods("POST")
 	router.HandleFunc("/api/go/users/{id}", getUser(db)).Methods("GET")
 	router.HandleFunc("/api/go/users/{id}", updateUser(db)).Methods("PUT")
 	router.HandleFunc("/api/go/users/{id}", deleteUser(db)).Methods("DELETE")
 
-	// wrap the router with CORS and JSON content type middlewares
-	enhancedRouter := enableCORS(jsonContentTypeMiddleware(router))
-
-	//start server 
-	log.Fatal(http.ListenAndServe(":8000", enhancedRouter))
+	//start server
+	log.Fatal(http.ListenAndServe(":8000", enableCORS(router)))
 }
 
 func enableCORS(next http.Handler) http.Handler {
-	retun http.HandlerFunc(func(w http.ResponseWriter, r *http.Request)
-    //Set CORS headers
-	w.Header().Set("Access-Control-Allow-Origin", "*") //Allow any origin
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS ") 
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//Set CORS headers
+		w.Header().Set("Access-Control-Allow-Origin", "*") //Allow any origin
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Header", "Content-Type")
+
+		//Check if the request is for CORS preflight
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		//Pass down the request to the next middleware (or final handler)
+		next.ServeHTTP(w, r)
+	})
+}
+
+func jsonContentTypeMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//Set JSON Content-Type
+		w.Header().Set("Content-Type", "application/json")
+		next.ServeHTTP(w, r)
+	})
+}
+
+// Get all users
+func getUsers(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		rows, err := db.Query("SELECT * FROM users")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer rows.Close()
+		users := []User{} // array of users
+		for rows.Next() {
+			var u User
+			if err := rows.Scan(&u.Id, &u.Name, &u.Email); err != nil {
+				log.Fatal(err)
+			}
+			users = append(users, u)
+		}
+		if err := rows.Err(); err != nil {
+			log.Fatal(err)
+		}
+
+		json.NewEncoder(w).Encode(users)
+	}
+}
+
+// get user by id
+func getUser(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id := vars["id"]
+
+		var u User
+		err := db.QueryRow("SELECT * FROM users WHERE id = $1", id).Scan(&u.Id, &u.Name, &u.Email)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		json.NewEncoder(w).Encode(u)
+	}
+}
+
+// Create user
+func createUser(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var u User
+		json.NewDecoder(r.Body).Decode(&u)
+
+		err := db.QueryRow("INSERT INTO users(name,email)VALUES($1, $2) RETURNING id", u.Name, u.Email).Scan(&u.Id)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		json.NewEncoder(w).Encode(u)
+	}
 }
