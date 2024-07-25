@@ -1,6 +1,6 @@
 module api
 
-go 1.22.5
+go 1.22
 
 require (
 	github.com/go-pg/pg/v10 v10.13.0 // indirect

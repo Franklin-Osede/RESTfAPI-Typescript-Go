@@ -37,7 +37,7 @@ func main() {
 	router.HandleFunc("/api/go/users", getUsers(db)).Methods("GET")
 	router.HandleFunc("/api/go/users", createUser(db)).Methods("POST")
 	router.HandleFunc("/api/go/users/{id}", getUser(db)).Methods("GET")
-	router.HandleFunc("/api/go/users/{id}", updateUser(db)).Methods("PUT")
+	router.HandleFunc("/api/go/users/{id}", updatedUser(db)).Methods("PUT")
 	router.HandleFunc("/api/go/users/{id}", deleteUser(db)).Methods("DELETE")
 
 	//start server
@@ -127,7 +127,7 @@ func createUser(db *sql.DB) http.HandlerFunc {
 }
 
 // Update User
-func update(db *sql.DB) http.HandlerFunc {
+func updatedUser(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var u User
 		json.NewDecoder(r.Body).Decode(&u)
