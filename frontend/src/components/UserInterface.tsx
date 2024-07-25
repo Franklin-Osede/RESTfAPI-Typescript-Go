@@ -77,7 +77,16 @@ const UserInterface: React.FC<UserInterfaceProps> = ({backendName}) => {
         }
     }
 
-
+   
+    //Delete a user
+    const deleteUser = async(userId: number)=>{
+        try {
+            await axios.delete(`${apiUrl}/api/${backendName}/users/${userId}`);
+            setUsers(users.filter((user)=>user.id != userId));
+        } catch (error) {
+            console.error('Error deleting user:',error)
+        }
+    }
 
 
     return (
@@ -137,9 +146,9 @@ const UserInterface: React.FC<UserInterfaceProps> = ({backendName}) => {
         {users.map((user)=>(
             <div key={user.id} className='flex items-center justify-between bg-white p-4 rounded-lg shadow'>
                 <CardComponent card={user} />
-               { /*  <button onClick={()=> deleteUser(user.id)} className={`${btnColor} text-white py-2 px-4 rounded `}>
+                 <button onClick={()=> deleteUser(user.id)} className={`${btnColor} text-white py-2 px-4 rounded `}>
                     Delete user
-                </button> */}
+                </button> 
             </div>
         ))}
 
