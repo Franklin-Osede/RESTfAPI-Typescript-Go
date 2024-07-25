@@ -20,7 +20,9 @@ type User struct {
 // main function
 func main() {
 	//connect to database
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	connStr := os.Getenv("DATABASE_URL") + "?sslmode=disable"
+
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
 	}
