@@ -4,7 +4,7 @@ A Comprehensive User Management System
 
 ## Introduction
 
-Welcome to the User Management API! This project provides a robust backend service developed using Go, with a PostgreSQL database, and a Next.js frontend. The application supports creating, retrieving, updating, and deleting users, leveraging Axios for HTTP requests and TypeScript for type safety. Both the backend and frontend are containerized using Docker for easy deployment and scalability.
+Welcome to the User Management API! This project provides a robust backend service developed using Go programming language, a PostgreSQL database, and a Next.js frontend. The application supports creating, retrieving, updating, and deleting users, leveraging Axios for HTTP requests and TypeScript for type safety. Both the backend and frontend are containerized using Docker for easy deployment and scalability.
 
 ## Why?
 
