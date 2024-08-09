@@ -8,7 +8,7 @@ Welcome to the User Management API! This project provides a robust backend servi
 
 ## Why?
 
-The motivation behind this project is to create an efficient and scalable user management system. This API aims to solve common problems associated with managing user data, such as secure data storage, efficient data retrieval, and seamless integration with frontend applications.
+The motivation behind developing this project was to create an efficient and scalable user management system. This API aims to solve common problems associated with managing user data, such as secure data storage, efficient data retrieval, and seamless integration with frontend applications.
 
 ## What does the program do?
 
